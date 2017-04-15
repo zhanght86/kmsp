@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yonyou.kms.modules.pub.dao.EnterpriseDao">
+	<insert id="insert">
+		INSERT INTO ENTERPRISE(ID,CODE,NAME,TELEPHONE,MOBILE_TELEPHONE,EMAIL,TENANT_ID,CREATE_TIME,DESCS,CREATOR,ADDRESS)
+		   VALUES(
+			#{id},
+			#{code},
+			#{name},
+			#{telephone},
+			#{mobilePhone},
+			#{email},
+			#{tenantId},
+			#{createDate},
+			#{descs},
+			#{createBy.name},
+			#{address}
+		)
+	</insert>
+	<select id="getNumber" resultType="Int">
+		select count(id) from enterprise 
+	</select>
+</mapper>

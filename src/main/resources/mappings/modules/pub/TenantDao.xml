@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yonyou.kms.modules.pub.dao.TenantDao">
+	<insert id="insert">
+		INSERT INTO TENANT(id,tenant_id,create_time,enable,audi_status,tenant_schema_name,sys_schema_name)
+		VALUES(
+			#{id},
+			#{tenantId},
+			#{createDate},
+			#{enable},
+			#{delFlag},
+			#{tenantSchemaName},
+			#{sysSchemaName}
+		)
+	</insert>
+	<select id="getNumber" resultType="Int">
+		select count(id) from tenant
+	</select>
+	<select id="get" >
+		select 
+			id as "id",
+			tenant_id as "tenantId",
+			create_time as "createDate",
+			enable as "enable",
+			audi_status as "delFlag",
+			tenant_schema_name as "tenantSchemaName",
+		from
+			tenant
+	</select>
+</mapper>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yonyou.kms.modules.sys.dao.UserSchemaDao">
+
+	<sql id="userSchemaColumns">
+	a.ID,
+	a.USER_ID AS "userId",
+	a.ENT_ID AS "entId",
+	a.LOGIN_NAME AS "loginName",
+	a.TENANT_SCHEMA_NAME AS "tenantSchemaName"
+	</sql>
+	
+	<insert id="insert">
+		INSERT INTO 
+		USER_ENT(LOGIN_NAME,USER_ID,ENT_ID,TENANT_SCHEMA_NAME,ID) VALUES
+		(
+		#{loginName},
+		#{userId},
+		#{entId},
+		#{tenantSchemaName},
+		#{id}
+		)
+	</insert>
+	
+	<select id="findAllList" resultType="UserSchema">
+		select
+		login_name as "loginName",
+		user_id as "userId",
+		ent_id as "entId",
+		tenant_schema_name as "tenantSchemaName"
+		from user_ent
+	</select>
+	
+	<!-- add hefeng 查询是否存在schema-->
+	<select id="isSchemaExist" resultType="java.lang.Integer">
+		select count(SCHEMA_NAME) from information_schema.schemata
+		where SCHEMA_NAME=#{schemaName}
+	</select>
+	<!-- end -->
+	
+	<select id="findByUserId" resultType="UserSchema">
+		select
+		login_name as "loginName",
+		user_id as "userId",
+		ent_id as "entId",
+		tenant_schema_name as "tenantSchemaName"
+		from user_ent where user_id=#{userId}
+	</select>
+	
+	
+	<!-- add yinshh3 根据loginName得到实体-->
+	<select id="getUserSchemaByLoginName" resultType="UserSchema">
+		SELECT <include refid="userSchemaColumns"/>
+		FROM user_ent a
+		where a.LOGIN_NAME=#{LoginName}
+	</select>
+	<!-- end -->
+	
+	
+	
+</mapper>

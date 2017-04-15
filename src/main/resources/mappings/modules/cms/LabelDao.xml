@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yonyou.kms.modules.cms.dao.LabelDao">
+
+
+	<select id="getHotLabelData" resultType="Label">
+		select 	a.LABEL_ID as "id", 
+				a.LABEL_VALUE as "labelvalue",
+				a.countarticle as "countarticle" 
+        from 	
+        (select 
+        l.label_id,
+        l.label_value,
+        (select count(c.id) from ${str}.cms_article a,${str}.cms_label_conn_arti r,${str}.cms_category c where l.label_id=r.label_id and a.id=r.article_id and a.category_id=c.id and a.del_flag='0' and c.del_flag='0' ) as countarticle
+        from
+        ${str}.cms_label l
+         where l.DEL_FLAG='0' 
+        order by countarticle desc) a 
+				LIMIT 5 OFFSET 0
+	</select>
+	<insert id="batchinsert" parameterType="java.util.List">
+		INSERT INTO ${str}.CMS_LABEL_COUNT(LABEL_ID,COUNT_ARTICLE) values
+			<foreach  collection="list" item="item" index="index"  separator="," >
+					(#{item.id},
+					#{item.countarticle})
+			</foreach>
+	</insert>
+	
+	<select id="getLabelData" resultType="Label">
+		SELECT 
+			c.label_id as "id",
+			l.label_value as "labelvalue",
+			c.count_article as "countarticle"
+		from
+			cms_label_count c,cms_label l
+		where
+			c.label_id=l.label_id
+		order by
+			count_article desc
+	</select>
+	<select id="getAllid" resultType="String">
+		SELECT 
+			LABEL_ID
+		FROM 
+			${str}.CMS_LABEL_COUNT
+	</select>
+	<update id="batchupdate" parameterType="java.util.List">
+			<foreach collection="list" item="item"  index="index" separator=";" >
+				UPDATE ${str}.CMS_LABEL_COUNT
+				SET
+					LABEL_ID=#{item.id},
+					COUNT_ARTICLE=#{item.countarticle}
+				WHERE
+					LABEL_ID=#{item.id}			
+			</foreach>
+	</update>
+	<delete id="batchdelete" parameterType = "java.util.List"> 
+		DELETE FROM ${str}.CMS_LABEL_COUNT
+		WHERE LABEL_ID in
+		<foreach collection="list" item = "item" open="(" separator="," close=")">
+		#{item}  
+   		</foreach>
+	</delete>
+	<select id="getAllLabel" resultType="Label">
+		SELECT LABEL_ID AS "id",
+		LABEL_VALUE as "labelvalue",
+		LABEL_CONTENT as "labelcontent",
+		DEL_FLAG as "delFlag"
+		FROM CMS_LABEL
+		WHERE DEL_FLAG='0'
+		<if test="labelvalue !=null and labelvalue !=''">
+			and LABEL_VALUE=#{labelvalue}	
+		</if>
+		order by CREATEDATE desc
+	</select>
+	<insert id="insert">
+		INSERT INTO CMS_LABEL(LABEL_ID,LABEL_VALUE,LABEL_CONTENT,DEL_FLAG,USER_ID,CREATEDATE)
+		VALUES(#{id},#{labelvalue},#{labelcontent},#{delFlag},#{userid},#{createDate})
+	</insert>
+	<update id="update">
+		UPDATE CMS_LABEL
+		SET
+			DEL_FLAG=#{delFlag}
+			<if test="labelvalue !=null and labelvalue !=''">
+			,LABEL_VALUE=#{labelvalue}
+			</if>
+			<if test="labelcontent !=null and labelcontent!=''">
+			,LABEL_CONTENT=#{labelcontent}
+			</if>
+		WHERE
+			LABEL_ID=#{id}	
+	</update>
+	<delete id="delete">
+		DELETE FROM CMS_LABEL
+		WHERE LABEL_ID=#{id}
+	</delete>
+	<select id="get" resultType="Label">
+		select 	label_id as "id",
+				label_value as "labelvalue",
+				label_content as "labelcontent",
+				del_flag as "delFlag",
+				user_id as "userid"
+		from cms_label
+		where label_id=#{id}
+	</select>
+	<select id="findList" resultType="Label">
+		select 	
+        l.label_id as "id",
+        l.label_value as "labelvalue",
+				l.label_content as "labelcontent",
+        (select count(u.id) from cms_label_conn_user u,sys_user s where u.label_id=l.label_id and s.id=u.user_id and s.del_flag='0') as "countuser",
+				(select count(*) from cms_label_conn_arti a,cms_article r where a.article_id=r.id and r.del_flag='0' and a.label_id=l.label_id) as "countarticle",
+      	l.del_flag as "delFlag",
+      	l.CREATEDATE as "createDate",
+      	u.name as "createBy.name"
+      from 	cms_label l,sys_user u
+      where l.del_flag=#{delFlag} and l.user_id=u.id
+      		<if test="labelvalue !=null and labelvalue !=''">
+      			and l.LABEL_VALUE Like '%'||#{labelvalue}||'%'
+      		</if>
+      		<if test="userid !=null and userid !=''">
+      			and u.id=#{userid}
+      		</if>
+      order by l.CREATEDATE desc
+	</select>
+	<select id="batchget" resultType="String">
+		select label_value
+		from cms_label
+		where label_id in 
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	
+	
+	</select>
+	
+	
+	<update id="MergeArticle">
+		UPDATE CMS_LABEL_CONN_ARTI SET 
+			category_id=#{1}
+		<where>
+			category_id = #{0}
+			<if test="#{2} != null">
+				AND article_id=#{2}
+			</if>
+		</where>
+	</update>
+	<!-- 查看是否是重复的标签 -->
+	<select id="findRepeatLabelName" resultType="String">
+		SELECT LABEL_VALUE
+		FROM CMS_LABEL
+		WHERE
+			LABEL_VALUE=#{labelName}
+	</select>
+	
+	<update id="MergeCategory">
+		UPDATE CMS_LABEL_CONN_ARTI SET 
+			category_id=#{1}
+		<where>
+			category_id = #{0}
+			
+		</where>
+	</update>
+	
+	<select id="getUserUnexamineLabel" resultType="Label">
+		select 
+			label_id as "id",
+			label_value as "labelvalue",
+			DEL_FLAG as "delFlag" 
+		from 
+			cms_label 
+		where 
+			user_id=#{userid} and del_flag='1'
+			<if test="labelvalue!=null and labelvalue !=''">
+				and label_value=#{labelvalue}
+			</if>
+	</select>
+	<select id="findUnMergeLabel" resultType="Label">
+		select 
+  			label_id as "id",
+  			label_value as "labelvalue"
+		from
+  			cms_label
+		where
+  			del_flag='0' and label_id != #{id}
+  		order by CREATEDATE desc
+	</select>
+	<update id="updateMergeLabelbyArticle">
+		update CMS_LABEL_CONN_ARTI set
+			label_id=#{0}
+		where
+			label_id=#{1}
+	
+	</update>
+	<update id="updateMergeLabelbyUser">
+		update CMS_LABEL_CONN_user set
+			label_id=#{0}
+		where
+			label_id=#{1}
+	
+	</update>
+	<update id="updateMergeLabel">
+		update cms_label set
+			label_value=#{1}
+		where
+			label_id=#{0}
+	</update>
+	<select id="findRepeatMergeLabelByArticle" resultType="String">
+		select 
+  			a.article_id
+		from       
+  			(select article_id from cms_label_conn_arti where label_id=#{0}) l,
+  			cms_label_conn_arti a
+		where 
+  			a.label_id=#{1} and l.article_id=a.ARTICLE_ID
+	</select>
+	<select id="findRepeatMergeLabelByUser" resultType="String">
+		select 
+  			a.user_id 
+		from       
+  			(select user_id from cms_label_conn_user where label_id=#{0}) l,
+  			cms_label_conn_user a
+		where 
+  			a.label_id=#{1} and l.user_id=a.user_id
+	</select>
+	<delete id="deleteMergeLabelbyArticle">
+		delete from cms_label_conn_arti
+		where label_id=#{labelid} and article_id in
+			<foreach item="item" index="index" collection="articleids" 
+                         open="(" separator="," close=")">
+                        #{item}
+            </foreach>
+	
+	</delete>
+	<delete id="deleteMergeLabelbyUser">
+		delete from cms_label_conn_user
+		where label_id=#{labelid} and user_id in
+			<foreach item="item" index="index" collection="userids" 
+                         open="(" separator="," close=")">
+                        #{item}
+            </foreach>
+	
+	</delete>
+</mapper>
