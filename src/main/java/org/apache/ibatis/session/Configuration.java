@@ -130,11 +130,11 @@ public class Configuration{
 
 	protected String databaseId;
 	
-	private boolean falg=false;
+	/*private boolean falg=false;
 	Connection connection =null;
 	String schema=null;
 	String name=null;
-	PreparedStatement prepareStatement =null;
+	PreparedStatement prepareStatement =null;*/
 	/**
 	 * Configuration factory class. Used to create Configuration for loading
 	 * deserialized unread properties.
@@ -536,7 +536,7 @@ public class Configuration{
 		if (cacheEnabled) {
 			executor = new CachingExecutor(executor);
 		}
-		Transaction transaction2 = executor.getTransaction();
+		/*Transaction transaction2 = executor.getTransaction();
 			
 			//获取链接  切换模式
 			try {
@@ -560,7 +560,7 @@ public class Configuration{
 				
 			}finally{
 				
-			}
+			}*/
 			
 		executor = (Executor) interceptorChain.pluginAll(executor);
 		return executor;
