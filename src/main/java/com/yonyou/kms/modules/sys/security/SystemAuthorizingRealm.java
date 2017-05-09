@@ -24,6 +24,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yonyou.kms.common.config.Global;
@@ -50,7 +51,8 @@ import com.yonyou.kms.modules.sys.utils.UserUtils;
 public class SystemAuthorizingRealm extends AuthorizingRealm {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
-	
+
+	@Autowired
 	private SystemService systemService;
 
 	/**
