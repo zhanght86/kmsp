@@ -6,6 +6,8 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -25,6 +27,8 @@ import java.sql.SQLException;
 @Order(1)
 public class SaaSAop {
 
+    private static final Logger log= LoggerFactory.getLogger(SaaSAop.class);
+
     @Autowired
     private DataSource dataSource;
 
@@ -38,7 +42,7 @@ public class SaaSAop {
 
     @Before("serviceAspect()")
     public void doBefore(JoinPoint joinPoint) {
-        Connection connection = DataSourceUtils.getConnection(dataSource);//获取当前线程的连接
+        Connection connection = DataSourceUtils.getConnection(dataSource);//获取当前线程的连接，此连接为自动提交模式
         doChangeSchema(connection);
     }
 
@@ -47,12 +51,13 @@ public class SaaSAop {
         try {
             String schema=(String) UserUtils.getCache("schema");
             if(StringUtils.isNotBlank(schema)){
-                prepareStatement = connection.prepareStatement("set search_path="+schema);
-                prepareStatement.executeUpdate();
-            }/*else{
-                prepareStatement = connection.prepareStatement("set search_path=\"Sys_Schema\"");
-                prepareStatement.executeUpdate();
-            }*/
+
+            }else{
+                schema="Sys_Schema";
+            }
+            prepareStatement = connection.prepareStatement("set search_path="+schema);
+            prepareStatement.executeUpdate();
+            log.debug("SaaSAop change schema :"+schema);
         } catch (SQLException e) {
             e.printStackTrace();
         }
